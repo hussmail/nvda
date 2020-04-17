@@ -562,11 +562,10 @@ def removeMainExecutables(installDir, shouldTerminateRunningProcesses):
 					if not shouldTerminateRunningProcesses:
 						raise RetriableFailure(f"File {f} is running as process with PID {processId}")
 					log.debug(f"Terminating {f}, process {processId}")
-					try:
-						systemUtils.forceTerminateProcess(processId)
-					except OSError:
+					res = systemUtils.execElevated(r"c:\windows\system32\taskkill.exe", ["/PID", str(processId), "/F"], True, True)
+					if res != 0:
 						# If termination failed, tryRemoveFile fails below.
-						log.error(f"Couldn't terminate {f}, process {processId}", exc_info=True)
+						log.error(f"Couldn't terminate {f}, process {processId}")
 			log.debug(f"Trying to remove {f}")
 			tryRemoveFile(f)
 
